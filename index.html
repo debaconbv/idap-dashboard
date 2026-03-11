@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IDAP AI Agent | The Wave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:        #1a9fa0;
+      --teal-dark:   #0e7a7b;
+      --teal-light:  #3dbebf;
+      --navy:        #0c3d4a;
+      --navy-mid:    #0e4d5c;
+      --navy-dark:   #082d38;
+      --white:       #ffffff;
+      --off-white:   #f6f8f9;
+      --light-gray:  #eaf2f3;
+      --text-dark:   #1a2530;
+      --text-mid:    #4a6170;
+      --text-light:  #7a96a3;
+      --border:      #d4e6ea;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--white);
+      color: var(--text-dark);
+      overflow-x: hidden;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4rem;
+      height: 68px;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Logo: SVG wave icon + thewave text */
+    .nav-logo {
+      display: flex; align-items: center; gap: 0;
+      text-decoration: none;
+    }
+    .nav-logo svg { width: 42px; height: 42px; }
+    .nav-logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 1.15rem;
+      color: var(--text-dark); letter-spacing: -0.02em;
+      margin-left: 4px;
+    }
+
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-dark); text-decoration: none;
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-cta {
+      background: var(--teal); color: #fff;
+      padding: 0.6rem 1.6rem; border-radius: 2px;
+      text-decoration: none; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      transition: background .2s;
+    }
+    .nav-cta:hover { background: var(--teal-dark); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 8rem 4rem 5rem;
+      gap: 4rem;
+      background: var(--white);
+      position: relative; overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--teal), var(--teal-light), transparent);
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--text-light);
+      font-family: 'Montserrat', sans-serif; font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(2.4rem, 4.5vw, 4rem);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -0.02em; color: var(--text-dark);
+    }
+    .hero h1 .accent { color: var(--teal); }
+    .hero-sub {
+      margin-top: 1.8rem; max-width: 520px;
+      color: var(--text-mid); font-size: 1rem;
+      line-height: 1.8; font-weight: 400;
+    }
+    .hero-actions {
+      margin-top: 2.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--teal); color: #fff;
+      padding: 0.85rem 2rem; border-radius: 2px;
+      text-decoration: none; font-weight: 700;
+      font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
+      transition: background .2s, transform .15s;
+    }
+    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    .btn-ghost {
+      color: var(--text-dark); text-decoration: none;
+      font-weight: 600; font-size: 0.85rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      border-bottom: 2px solid var(--teal); padding-bottom: 2px;
+      transition: color .2s;
+    }
+    .btn-ghost:hover { color: var(--teal); }
+
+    /* Hero visual */
+    .hero-visual {
+      display: flex; flex-direction: column; gap: 0;
+      background: var(--off-white);
+      border: 1px solid var(--border); border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(10,60,74,0.1);
+    }
+    .hv-bar {
+      background: var(--navy); padding: 0.85rem 1.4rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .hv-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .hv-dot-r { background: #ff5f57; }
+    .hv-dot-y { background: #ffbd2e; }
+    .hv-dot-g { background: #28c840; }
+    .hv-title { color: rgba(255,255,255,0.5); font-size: 0.75rem; margin: 0 auto; letter-spacing: 0.05em; }
+    .hv-body { padding: 1.6rem; display: flex; flex-direction: column; gap: 0.85rem; }
+    .hv-step {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.9rem 1.1rem;
+      background: var(--white); border: 1px solid var(--border); border-radius: 4px;
+      transition: border-color .3s;
+    }
+    .hv-step:hover { border-color: var(--teal); }
+    .hv-icon {
+      width: 38px; height: 38px; border-radius: 4px;
+      background: var(--light-gray); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .hv-label { flex: 1; }
+    .hv-label strong { display: block; font-size: 0.85rem; color: var(--text-dark); font-weight: 600; }
+    .hv-label span { font-size: 0.76rem; color: var(--text-light); }
+    .hv-badge {
+      font-size: 0.68rem; padding: 0.22rem 0.65rem;
+      border-radius: 20px; font-weight: 700; letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .badge-done { background: #e6f9ee; color: #1a7a3c; border: 1px solid #b3ebc8; }
+    .badge-proc { background: #e6f5f5; color: var(--teal-dark); border: 1px solid #a3d9d9; }
+    .badge-wait { background: #f0f4f6; color: var(--text-light); border: 1px solid var(--border); }
+    .hv-arrow { text-align: center; color: var(--teal); font-size: 1rem; line-height: 1; margin: -0.2rem 0; }
+
+    /* ─── SECTION BASE ─── */
+    section { padding: 6rem 4rem; }
+    .container { max-width: 1240px; margin: 0 auto; }
+    .section-eyebrow {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--teal);
+      font-weight: 600; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 800; line-height: 1.15;
+      letter-spacing: -0.02em; color: var(--text-dark);
+    }
+    .section-title .accent { color: var(--teal); }
+    .section-body {
+      color: var(--text-mid); font-size: 1rem; line-height: 1.8;
+      max-width: 600px; margin-top: 1.2rem;
+    }
+
+    /* ─── CONTEXT BAND ─── */
+    .context-band {
+      background: var(--navy);
+      padding: 5rem 4rem;
+    }
+    .context-grid {
+      max-width: 1240px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: center;
+    }
+    .context-band .section-title { color: var(--white); }
+    .context-band .section-body { color: rgba(255,255,255,0.65); max-width: 100%; }
+    .context-band .section-eyebrow { color: var(--teal-light); }
+    .reg-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .reg-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+      padding: 1.4rem 1.6rem;
+      display: flex; gap: 1.2rem; align-items: flex-start;
+    }
+    .reg-badge {
+      background: var(--teal); color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.3rem 0.7rem; border-radius: 2px;
+      white-space: nowrap; flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .reg-text h4 { color: var(--white); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .reg-text p { color: rgba(255,255,255,0.55); font-size: 0.83rem; line-height: 1.6; }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-section { background: var(--off-white); }
+    .phases-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 0; margin-top: 3.5rem;
+      border: 1px solid var(--border); border-radius: 4px;
+      overflow: hidden;
+    }
+    .phase {
+      padding: 2rem 1.5rem;
+      border-right: 1px solid var(--border);
+      position: relative; transition: background .25s;
+      background: var(--white);
+    }
+    .phase:last-child { border-right: none; }
+    .phase:hover { background: var(--light-gray); }
+    .phase-num {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem; font-weight: 700; color: var(--teal);
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .phase-icon { font-size: 1.5rem; margin-bottom: 0.8rem; }
+    .phase h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark); font-family: 'Montserrat', sans-serif; }
+    .phase p { font-size: 0.8rem; color: var(--text-mid); line-height: 1.6; }
+    .phase-connector {
+      position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
+      width: 17px; height: 17px; background: var(--teal);
+      border-radius: 50%; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.6rem; font-weight: 700;
+    }
+    .phase:last-child .phase-connector { display: none; }
+
+    /* ─── SOLUTION ─── */
+    .solution-section { background: var(--white); }
+    .sol-two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: start; margin-top: 3.5rem;
+    }
+    .sol-list { display: flex; flex-direction: column; gap: 0; }
+    .sol-item {
+      display: flex; gap: 1.4rem;
+      padding: 1.8rem 0; border-bottom: 1px solid var(--border);
+    }
+    .sol-item:first-child { padding-top: 0; }
+    .sol-num {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.6rem; font-weight: 900;
+      color: var(--teal); flex-shrink: 0; line-height: 1;
+    }
+    .sol-content h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; font-family: 'Montserrat', sans-serif; }
+    .sol-content p { font-size: 0.85rem; color: var(--text-mid); line-height: 1.65; }
+
+    /* Terminal block */
+    .terminal {
+      background: #0d1117; border: 1px solid #30363d;
+      border-radius: 6px; overflow: hidden;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    .terminal-bar {
+      background: #161b22; padding: 0.85rem 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid #30363d;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c840; }
+    .t-title { margin: 0 auto; font-size: 0.72rem; color: #6e7681; letter-spacing: 0.05em; }
+    .terminal-body { padding: 1.4rem; font-size: 0.78rem; line-height: 2; }
+    .t-dim { color: #6e7681; } .t-green { color: #3fb950; } .t-teal { color: #39c5c5; }
+    .t-white { color: #e6edf3; } .t-yellow { color: #e3b341; }
+
+    /* ─── USE CASES ─── */
+    .cases-section { background: var(--off-white); }
+    .cases-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-top: 3.5rem;
+    }
+    .case-card {
+      background: var(--white);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2.2rem 1.8rem;
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .case-card:hover {
+      border-color: var(--teal);
+      box-shadow: 0 6px 24px rgba(26,159,160,0.1);
+    }
+    .case-icon {
+      width: 46px; height: 46px; background: var(--light-gray);
+      border: 1px solid var(--border); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 1.3rem;
+    }
+    .case-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; font-family: 'Montserrat', sans-serif; color: var(--text-dark); }
+    .case-card p { font-size: 0.83rem; color: var(--text-mid); line-height: 1.65; }
+    .case-tag {
+      display: inline-block; margin-top: 1rem;
+      font-size: 0.68rem; color: var(--teal-dark);
+      background: var(--light-gray);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.7rem; border-radius: 20px;
+      font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    /* ─── STATS BAND ─── */
+    .stats-band {
+      background: var(--navy);
+      padding: 5rem 4rem;
+    }
+    .stats-inner {
+      max-width: 1240px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+    .stat-block { text-align: center; }
+    .stat-val {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3.2rem; font-weight: 900;
+      color: var(--teal-light); line-height: 1; margin-bottom: 0.6rem;
+    }
+    .stat-lbl { font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+    /* ─── RISK ─── */
+    .risk-section { background: var(--white); }
+    .risk-grid {
+      display: grid; grid-template-columns: repeat(2,1fr);
+      gap: 1.5rem; margin-top: 3.5rem;
+    }
+    .risk-card {
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 1.8rem; transition: border-color .25s;
+    }
+    .risk-card:hover { border-color: var(--teal); }
+    .risk-header {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem;
+    }
+    .risk-icon { font-size: 1.2rem; }
+    .risk-card h4 { font-size: 0.9rem; font-weight: 700; font-family: 'Montserrat', sans-serif; }
+    .risk-level {
+      margin-left: auto; font-size: 0.68rem; font-weight: 700;
+      padding: 0.2rem 0.7rem; border-radius: 20px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .risk-low { background: #e6f9ee; color: #1a7a3c; border: 1px solid #b3ebc8; }
+    .risk-mid { background: #fff8e6; color: #8a6000; border: 1px solid #ffe0a0; }
+    .risk-card p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.65; }
+
+    /* ─── CTA ─── */
+    .cta-band {
+      background: var(--teal);
+      padding: 5rem 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 3rem;
+    }
+    .cta-band h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800; max-width: 560px; line-height: 1.2;
+      color: #fff;
+    }
+    .btn-white {
+      background: #fff; color: var(--teal);
+      padding: 1rem 2.4rem; border-radius: 2px;
+      text-decoration: none; font-weight: 800;
+      font-size: 0.82rem; white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      transition: background .2s, transform .2s; flex-shrink: 0;
+    }
+    .btn-white:hover { background: var(--light-gray); transform: translateY(-2px); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--navy-dark);
+      padding: 4rem 4rem 2.5rem;
+    }
+    .footer-grid {
+      max-width: 1240px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 4rem; margin-bottom: 3rem;
+    }
+    .footer-brand p { color: rgba(255,255,255,0.45); font-size: 0.85rem; line-height: 1.7; margin-top: 1rem; max-width: 240px; }
+    .footer-col h5 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--teal-light);
+      margin-bottom: 1.2rem; font-weight: 700;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+    .footer-col a { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.85rem; transition: color .2s; }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom {
+      max-width: 1240px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.78rem; color: rgba(255,255,255,0.3);
+    }
+    .footer-bottom a { color: rgba(255,255,255,0.3); text-decoration: none; }
+
+    /* ─── ANIMATION ─── */
+    .fade-up { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+    .fade-up.vis { opacity: 1; transform: translateY(0); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 960px) {
+      nav { padding: 0 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 4rem; }
+      .context-grid, .sol-two-col { grid-template-columns: 1fr; gap: 2.5rem; }
+      .phases-grid { grid-template-columns: 1fr 1fr; }
+      .cases-grid { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .risk-grid { grid-template-columns: 1fr; }
+      .cta-band { flex-direction: column; padding: 3.5rem 1.5rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a class="nav-logo" href="#">
+    <!-- thewave logo: spiral wave mark + wordmark -->
+    <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 4C11.6 4 4 11.6 4 21s7.6 17 17 17 17-7.6 17-17S30.4 4 21 4z" fill="#e8f7f7"/>
+      <path d="M10 22c2-4 4.5-6 7-5s3.5 4 6 4 4.5-3 7-5" stroke="#1a9fa0" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M8 26c2-4 5-7 8-6s3.5 4.5 6 4.5 4-2.5 7-5.5" stroke="#0e7a7b" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".6"/>
+    </svg>
+    <span class="nav-logo-text">thewave</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Meet thewave</a></li>
+    <li><a href="#">Jobs</a></li>
+    <li><a href="#">Blog</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get in touch</a>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div>
+    <p class="hero-eyebrow">AI Data Solutions · Employee Benefits</p>
+    <h1>
+      From pension<br>
+      regulation to<br>
+      <span class="accent">compliant IDAP</span><br>
+      — automatically.
+    </h1>
+    <p class="hero-sub">
+      Our IDAP AI Agent reads every <em>pensioenreglement</em>, extracts the right fields,
+      and generates a fully compliant Informatiefiche voor Aanvullende Pensioenen —
+      in NL, FR and EN — aligned with the FSMA template. No manual drafting. No missed obligations.
+    </p>
+    <div class="hero-actions">
+      <a href="#how" class="btn-primary">See how it works</a>
+      <a href="#contact" class="btn-ghost">Talk to us →</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hv-bar">
+      <div class="hv-dot hv-dot-r"></div>
+      <div class="hv-dot hv-dot-y"></div>
+      <div class="hv-dot hv-dot-g"></div>
+      <span class="hv-title">idap-agent · live processing</span>
+    </div>
+    <div class="hv-body">
+      <div class="hv-step">
+        <div class="hv-icon">📄</div>
+        <div class="hv-label">
+          <strong>Pensioenreglement ingested</strong>
+          <span>Mistral OCR · 48p PDF · scanned</span>
+        </div>
+        <span class="hv-badge badge-done">Done ✓</span>
+      </div>
+      <div class="hv-arrow">↓</div>
+      <div class="hv-step">
+        <div class="hv-icon">🧠</div>
+        <div class="hv-label">
+          <strong>AI Extraction · Phase 2</strong>
+          <span>Section keys → structured fields AS-IS</span>
+        </div>
+        <span class="hv-badge badge-done">Done ✓</span>
+      </div>
+      <div class="hv-arrow">↓</div>
+      <div class="hv-step">
+        <div class="hv-icon">📝</div>
+        <div class="hv-label">
+          <strong>Summarization · FSMA template</strong>
+          <span>11 sections · confidence 0.96</span>
+        </div>
+        <span class="hv-badge badge-proc">Running…</span>
+      </div>
+      <div class="hv-arrow">↓</div>
+      <div class="hv-step">
+        <div class="hv-icon">🌐</div>
+        <div class="hv-label">
+          <strong>Translation NL → FR / EN</strong>
+          <span>Preserving dates, percentages, references</span>
+        </div>
+        <span class="hv-badge badge-wait">Queued</span>
+      </div>
+      <div class="hv-arrow">↓</div>
+      <div class="hv-step">
+        <div class="hv-icon">✅</div>
+        <div class="hv-label">
+          <strong>Push to DCC · IDAP generated</strong>
+          <span>Traceability report · audit trail</span>
+        </div>
+        <span class="hv-badge badge-wait">Queued</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── REGULATORY CONTEXT ─── -->
+<div class="context-band fade-up">
+  <div class="context-grid">
+    <div>
+      <p class="section-eyebrow">Why now?</p>
+      <h2 class="section-title" style="color:var(--white)">Belgian pension law demands <span class="accent" style="color:var(--teal-light)">transparency</span> — at scale.</h2>
+      <p class="section-body">
+        Every Belgian pension plan sponsor must provide every affiliated member with an
+        <strong style="color:#fff">Informatiefiche voor de Aanvullende Pensioenen (IDAP)</strong>.
+        This document must follow a standardized FSMA template, cover 11 mandatory sections,
+        and be available in the member's language. Managing this manually for thousands of plans is no longer sustainable.
+      </p>
+      <p class="section-body" style="margin-top:1rem;">
+        We are already building this solution at a major Belgian insurance group. We know the regulation. We know the edge cases. We deliver.
+      </p>
+    </div>
+    <div class="reg-cards">
+      <div class="reg-card">
+        <span class="reg-badge">WAP</span>
+        <div class="reg-text">
+          <h4>Wet Aanvullende Pensioenen</h4>
+          <p>Every affiliated member must receive a standardized information sheet covering plan type, contributions, benefits, investment and exit rights.</p>
+        </div>
+      </div>
+      <div class="reg-card">
+        <span class="reg-badge">FSMA</span>
+        <div class="reg-text">
+          <h4>FSMA IDAP template</h4>
+          <p>The Financial Services and Markets Authority prescribes a fixed section structure. Content must be traceable to the underlying <em>pensioenreglement</em>.</p>
+        </div>
+      </div>
+      <div class="reg-card">
+        <span class="reg-badge">EU AI Act</span>
+        <div class="reg-text">
+          <h4>AI Act transparency obligations</h4>
+          <p>AI-generated regulatory documents require full auditability, confidence scoring, human oversight and documented governance — built into our architecture.</p>
+        </div>
+      </div>
+      <div class="reg-card">
+        <span class="reg-badge">Art. 24 WAP</span>
+        <div class="reg-text">
+          <h4>Return guarantees & disclosure</h4>
+          <p>Contribution levels, guaranteed returns, and cost structures must be disclosed precisely — our extraction validates these numerically against source documents.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="how-section fade-up" id="how">
+  <div class="container">
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-title">Five phases from <span class="accent">document</span> to compliant IDAP</h2>
+    <div class="phases-grid">
+      <div class="phase">
+        <div class="phase-num">Phase 01</div>
+        <div class="phase-icon">🔍</div>
+        <h3>Digitization</h3>
+        <p>Mistral AI OCR ingests all <em>pensioenreglementen</em> — PDFs, scans, Word files — normalising them into a clean, structured knowledge base per pension scheme.</p>
+        <div class="phase-connector">→</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">Phase 02</div>
+        <div class="phase-icon">🧩</div>
+        <h3>Extraction</h3>
+        <p>OpenAI + Python extracts the relevant sections AS-IS, by section key. No paraphrasing — exact text captured per IDAP rubric, tagged with source page and paragraph.</p>
+        <div class="phase-connector">→</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">Phase 03</div>
+        <div class="phase-icon">📝</div>
+        <h3>Summarization</h3>
+        <p>Each IDAP field is summarised using prompt-engineered OpenAI calls, mapping to the FSMA template sections. Confidence scores are assigned per field.</p>
+        <div class="phase-connector">→</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">Phase 04</div>
+        <div class="phase-icon">🌐</div>
+        <h3>Translation</h3>
+        <p>Content is translated NL↔FR↔EN by OpenAI, preserving dates, percentages, references and legal names verbatim. Cross-language semantic validation flags deviations.</p>
+        <div class="phase-connector">→</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">Phase 05</div>
+        <div class="phase-icon">🔗</div>
+        <h3>Delivery</h3>
+        <p>Validated IDAP content is pushed to DCC for final document generation and storage. Full traceability report and audit log generated automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SOLUTION DETAIL ─── -->
+<section class="solution-section fade-up">
+  <div class="container">
+    <p class="section-eyebrow">Our approach</p>
+    <div class="sol-two-col">
+      <div>
+        <h2 class="section-title">Built for <span class="accent">auditability</span> and scale</h2>
+        <p class="section-body">Our architecture goes beyond extraction — every decision is traceable, every output is governed.</p>
+        <div class="sol-list" style="margin-top:2rem;">
+          <div class="sol-item">
+            <div class="sol-num">01</div>
+            <div class="sol-content">
+              <h4>Section-by-section traceability</h4>
+              <p>Every generated sentence maps back to the exact source document, version, page, section and paragraph. Zero hallucination risk on content origin.</p>
+            </div>
+          </div>
+          <div class="sol-item">
+            <div class="sol-num">02</div>
+            <div class="sol-content">
+              <h4>Confidence scoring per field</h4>
+              <p>Each IDAP field carries a confidence score based on semantic match strength. Low-confidence items are automatically flagged for business review.</p>
+            </div>
+          </div>
+          <div class="sol-item">
+            <div class="sol-num">03</div>
+            <div class="sol-content">
+              <h4>Knowledge base with versioning</h4>
+              <p>Postgres SQL + pgvector stores chunked documents with scheme ID, language, effective dates and embeddings — so the system always knows which rules applied when.</p>
+            </div>
+          </div>
+          <div class="sol-item">
+            <div class="sol-num">04</div>
+            <div class="sol-content">
+              <h4>Semantic search frontend</h4>
+              <p>A Streamlit-based UI lets business users search across all <em>pensioenreglementen</em>, view error logs, access traceability reports and monitor processing status.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="t-title">idap-agent · extraction log</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-dim">09:14:22</span> <span class="t-green">INF</span> <span class="t-white"> OCR complete</span> <span class="t-teal">reglement_AZ_v3.pdf</span></div>
+          <div><span class="t-dim">09:14:23</span> <span class="t-green">INF</span> <span class="t-white"> Plan type:</span> <span class="t-teal">DEFINED_CONTRIBUTION · WAP</span></div>
+          <div><span class="t-dim">09:14:23</span> <span class="t-green">INF</span> <span class="t-white"> Extracting sections…</span></div>
+          <div><span class="t-dim">09:14:24</span> <span class="t-green">INF</span> <span class="t-white">  s3_target_audience</span> <span class="t-teal">→ page 4, §2.1</span></div>
+          <div><span class="t-dim">09:14:24</span> <span class="t-green">INF</span> <span class="t-white">  s4_contributions</span> <span class="t-teal">→ page 7, §3.2</span></div>
+          <div><span class="t-dim">09:14:24</span> <span class="t-green">INF</span> <span class="t-white">  s6_investment</span> <span class="t-teal">→ page 11, §4.1</span></div>
+          <div><span class="t-dim">09:14:25</span> <span class="t-green">INF</span> <span class="t-white"> Summarization…</span></div>
+          <div><span class="t-dim">09:14:26</span> <span class="t-green">INF</span> <span class="t-white">  confidence_score</span> <span class="t-green">0.96 ✓</span></div>
+          <div><span class="t-dim">09:14:26</span> <span class="t-green">INF</span> <span class="t-white"> Translation NL→FR→EN</span> <span class="t-green">✓</span></div>
+          <div><span class="t-dim">09:14:27</span> <span class="t-green">INF</span> <span class="t-white"> Cross-lang validation</span> <span class="t-green">PASSED ✓</span></div>
+          <div><span class="t-dim">09:14:27</span> <span class="t-green">INF</span> <span class="t-white"> Pushed to DCC</span> <span class="t-green">200 OK ✓</span></div>
+          <div><span class="t-dim">09:14:27</span> <span class="t-yellow">INF</span> <span class="t-white"> Elapsed:</span> <span class="t-yellow">1.38s</span> <span class="t-teal">· 11/11 fields</span></div>
+          <br/>
+          <div><span class="t-dim">09:14:28</span> <span class="t-green">INF</span> <span class="t-white"> Next document queued</span> <span class="t-dim">█</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── USE CASES ─── -->
+<section class="cases-section fade-up">
+  <div class="container">
+    <p class="section-eyebrow">Where it delivers value</p>
+    <h2 class="section-title">Real use cases in <span class="accent">Belgian EB</span></h2>
+    <div class="cases-grid">
+      <div class="case-card">
+        <div class="case-icon">📋</div>
+        <h3>IDAP bulk generation</h3>
+        <p>Process hundreds of <em>pensioenreglementen</em> in a single batch run. Generate FSMA-compliant IDAP content for all affiliated members automatically — per language.</p>
+        <span class="case-tag">WAP · FSMA</span>
+      </div>
+      <div class="case-card">
+        <div class="case-icon">🔄</div>
+        <h3>Annual update cycle</h3>
+        <p>When plan rules change, the agent detects delta sections, re-extracts affected IDAP fields and regenerates updated content — without redoing the full document from scratch.</p>
+        <span class="case-tag">Versioning · EB Admin</span>
+      </div>
+      <div class="case-card">
+        <div class="case-icon">🏢</div>
+        <h3>Multi-insurer portfolio</h3>
+        <p>Brokers and insurers managing plans from different insurers get a normalised extraction pipeline that handles layout differences, language variants and historic document versions.</p>
+        <span class="case-tag">Broker · Portima · Brio</span>
+      </div>
+      <div class="case-card">
+        <div class="case-icon">📊</div>
+        <h3>Regulatory audit support</h3>
+        <p>Every generated field links back to its source, version and page. When the FSMA asks for justification, your team has a full traceable audit report ready in one click.</p>
+        <span class="case-tag">Compliance · FSMA</span>
+      </div>
+      <div class="case-card">
+        <div class="case-icon">🔍</div>
+        <h3>Semantic knowledge search</h3>
+        <p>Build a searchable knowledge base from all pension documents. Staff can query "what is the vesting schedule for plan X?" and get cited, sourced answers in seconds.</p>
+        <span class="case-tag">Knowledge Base · AI Search</span>
+      </div>
+      <div class="case-card">
+        <div class="case-icon">🔗</div>
+        <h3>Legacy migration support</h3>
+        <p>During a migration from a mainframe (e.g. VICOLIN) to a modern platform, our agent reads legacy policy documents and feeds structured IDAP fields directly into the new system.</p>
+        <span class="case-tag">Data Migration · EB</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<div class="stats-band fade-up">
+  <div class="stats-inner">
+    <div class="stat-block">
+      <div class="stat-val">≥95%</div>
+      <div class="stat-lbl">of IDAP content auto-generated — no manual drafting</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-val">≥25</div>
+      <div class="stat-lbl">IDAP documents generated per hour under normal load</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-val">&lt;5%</div>
+      <div class="stat-lbl">of generated content requires manual correction after review</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-val">3</div>
+      <div class="stat-lbl">languages: NL / FR / EN — per FSMA requirement</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── RISK & GOVERNANCE ─── -->
+<section class="risk-section fade-up">
+  <div class="container">
+    <p class="section-eyebrow">Governance & risk</p>
+    <h2 class="section-title">AI Act-ready, <span class="accent">by design</span></h2>
+    <p class="section-body">We positioned the IDAP agent as a document-drafting assistant — not a decision-making system. Every risk is mitigated with concrete architectural and process controls.</p>
+    <div class="risk-grid">
+      <div class="risk-card">
+        <div class="risk-header">
+          <div class="risk-icon">🤖</div>
+          <h4>Hallucination risk</h4>
+          <span class="risk-level risk-mid">Medium → Low</span>
+        </div>
+        <p>The agent works with fixed FSMA templates and structured section keys. Every output must show its source reference. Low-confidence fields are flagged for expert review before any document is finalized.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-header">
+          <div class="risk-icon">⚖️</div>
+          <h4>EU AI Act classification</h4>
+          <span class="risk-level risk-low">Low</span>
+        </div>
+        <p>Positioned as a "drafting assistant only" — not a system determining employment terms or benefits. Usage is logged, all generations tracked, manual and automated consistency checks embedded throughout.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-header">
+          <div class="risk-icon">🔐</div>
+          <h4>Security & privacy</h4>
+          <span class="risk-level risk-low">Low</span>
+        </div>
+        <p>Full risk analysis performed as part of the POC. Data stays in your infrastructure or a dedicated EU tenant. GDPR-compliant PII handling. Coordinated with your security architect from day one.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-header">
+          <div class="risk-icon">🔧</div>
+          <h4>Maintainability</h4>
+          <span class="risk-level risk-mid">Medium</span>
+        </div>
+        <p>An aftercare and training phase ensures your internal team can own and maintain the system. Governance aligned with Data Office guidelines. Knowledge transfer embedded in the project delivery.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<div class="cta-band fade-up" id="contact">
+  <h2>Ready to automate your IDAP production and meet your FSMA obligations?</h2>
+  <a href="mailto:reinold.vanhevel@ensur.be" class="btn-white">Let's talk →</a>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.1rem; color:#fff;">the<span style="color:var(--teal-light)">wave</span></span>
+      <p>We innovate today to create tomorrow's digital and data solutions for the insurance industry.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#">Digital Solutions</a></li>
+        <li><a href="#">Data Solutions</a></li>
+        <li><a href="#">IDAP AI Agent</a></li>
+        <li><a href="#">Data Migration</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#">Meet thewave</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Jobs</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="#">26 Tweekerkenstraat</a></li>
+        <li><a href="#">1000 Brussels, Belgium</a></li>
+        <li><a href="mailto:reinold.vanhevel@ensur.be">reinold.vanhevel@ensur.be</a></li>
+        <li><a href="#">LinkedIn</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 The Wave · All rights reserved</span>
+    <a href="#">Privacy Policy</a>
+  </div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
